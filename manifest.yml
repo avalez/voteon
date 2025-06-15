@@ -1,0 +1,26 @@
+modules:
+  jira:issueContext:
+    - key: vesting-vesting-context
+      resource: main
+      resolver:
+        function: resolver
+      title: vesting
+      label: Custom UI
+  function:
+    - key: resolver
+      handler: index.handler
+resources:
+  - key: main
+    path: static/vesting/build
+permissions:
+  external:
+    fetch:
+      client:
+        - 'https://*.solana.com'
+        - 'https://*.phantom.app'
+app:
+  runtime:
+    name: nodejs22.x
+    memoryMB: 256
+    architecture: arm64
+  id: ari:cloud:ecosystem::app/2c06d34a-7f45-4cfe-82fb-1e8b884c44c5
