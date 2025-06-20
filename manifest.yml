@@ -1,17 +1,17 @@
 modules:
   jira:issueContext:
-    - key: vesting-vesting-context
+    - key: voteon-context
       resource: main
       resolver:
         function: resolver
-      title: vesting
+      title: voteon
       label: Custom UI
   function:
     - key: resolver
       handler: index.handler
 resources:
   - key: main
-    path: static/vesting/build
+    path: static/voteon/build
 permissions:
   external:
     fetch:

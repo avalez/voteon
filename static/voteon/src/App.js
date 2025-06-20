@@ -4,7 +4,6 @@ import { Connection, PublicKey, clusterApiUrl } from '@solana/web3.js'
 
 function App() {
   const [data, setData] = useState(null);
-  const [address, setAddress] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [balance, setBalance] = useState("");
@@ -21,7 +20,7 @@ function App() {
 
     try {
       console.log('Fetching balance for Solana address...')
-      const connection = new Connection(clusterApiUrl('testnet'))
+      const connection = new Connection(clusterApiUrl('devnet'))
       const publicKey = new PublicKey(addressToCheck)
       const balance = await connection.getBalance(publicKey)
       
@@ -62,7 +61,6 @@ function App() {
           if (resp.publicKey) {
             setIsConnected(true);
             setUserAccount(resp.publicKey.toString());
-            setAddress(resp.publicKey.toString());
           }
         } catch (err) {
           console.error('Error connecting to Phantom wallet:', err);
@@ -86,7 +84,6 @@ function App() {
       const resp = await provider.connect();
       setIsConnected(true);
       setUserAccount(resp.publicKey.toString());
-      setAddress(resp.publicKey.toString());
     } catch (err) {
       if (err.code === 4001) {
         setError("Please connect to Phantom wallet.");
@@ -135,11 +132,8 @@ function App() {
             <div>
               <b>Wallet address</b>
             </div>
-            <input type="text" value={address} onChange={(e) => setAddress(e.target.value)} />
+            <input type="text" onChange={(e) => getBalance(e.target.value)} />
           </label>
-          <button disabled={loading} onClick={() => getBalance(address)}>
-            CHECK SOL BALANCE
-          </button>
           <div className="result">
             {loading && <span id="loader"></span>}
             {!isConnected && balance && <h2 id="balance">{balance}</h2>}
