@@ -44,12 +44,18 @@ describe("voteon", async () => {
 
   const connection = provider.connection;
 
-  const program = anchor.workspace.VoteOn as Program<ProgramsVoteon>;
+  const program = anchor.workspace.ProgramsVoteon as Program<ProgramsVoteon>;
 
   it("Is initialized!", async () => {
+    const balanceBefore = await connection.getBalance(payer.publicKey);
+    console.log(`Balance before: ${balanceBefore}`);
     // Add your test here.
-    const data = new anchor.BN(42);
     const tx = await program.methods.initialize().rpc();
+    await confirmTransaction(connection, tx);
+
     console.log("Your transaction signature", tx);
+    const balanceAfter = await connection.getBalance(payer.publicKey);
+    console.log(`Balance after: ${balanceAfter}`);
+    assert.ok(balanceAfter < balanceBefore);
   });
 });
