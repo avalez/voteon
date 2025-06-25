@@ -5,10 +5,10 @@ package_manager = "yarn"
 resolution = true
 skip-lint = false
 
-[programs.localnet]
-programs_voteon = "Be9tvYB3yTXbvqucYuGQQep2Cu4nE1ZXY9BsAvwguzu3"
-
 [programs.devnet]
+programs_voteon = "DTdGg36gheqPqJ8LFNzgsq3chmbejRHa2FNpAfCWMS6t"
+
+[programs.localnet]
 programs_voteon = "Be9tvYB3yTXbvqucYuGQQep2Cu4nE1ZXY9BsAvwguzu3"
 
 [registry]

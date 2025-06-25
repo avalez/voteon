@@ -1,18 +1,20 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Suspense } from 'react';
 import { invoke } from '@forge/bridge';
 import { Connection, PublicKey, clusterApiUrl } from '@solana/web3.js';
-import { Program, AnchorProvider, web3 } from '@coral-xyz/anchor';
+import { Program } from '@coral-xyz/anchor';
 import idl from './programs_voteon_idl.json';
+import { SolanaProvider, WalletButton, useAnchorProvider } from './solana-provider.tsx';
+import { useWallet } from '@solana/wallet-adapter-react';
 
-function App() {
+function MainApp() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [balance, setBalance] = useState("");
-  const [hasWallet, setHasWallet] = useState(false);
-  const [isConnected, setIsConnected] = useState(false);
-  const [userAccount, setUserAccount] = useState("");
   const [txSig, setTxSig] = useState("");
+
+  const anchorProvider = useAnchorProvider();
+  const { wallet, publicKey, connected } = useWallet();
 
   const getBalance = async (addressToCheck) => {
     if (!addressToCheck) return;
@@ -21,8 +23,8 @@ function App() {
     setBalance(null);
     try {
       const connection = new Connection(clusterApiUrl('devnet'));
-      const publicKey = new PublicKey(addressToCheck);
-      const balance = await connection.getBalance(publicKey);
+      const pubKey = new PublicKey(addressToCheck);
+      const balance = await connection.getBalance(pubKey);
       const solBalance = balance / 1e9;
       setBalance(`${solBalance} SOL`);
     } catch (e) {
@@ -32,66 +34,22 @@ function App() {
   };
 
   useEffect(() => {
-    if (isConnected && userAccount) {
-      getBalance(userAccount);
+    if (connected && publicKey) {
+      getBalance(publicKey.toBase58());
     }
-  }, [userAccount]);
+  }, [connected, publicKey]);
 
-  useEffect(() => {
-    const checkPhantomWallet = async () => {
-      const hasPhantom = window?.phantom?.solana || false;
-      if (hasPhantom) {
-        setHasWallet(true);
-        const provider = window.phantom?.solana;
-        if (!provider) return;
-        try {
-          const resp = await provider.connect();
-          if (resp.publicKey) {
-            setIsConnected(true);
-            setUserAccount(resp.publicKey.toString());
-          }
-        } catch (err) {
-          // ignore
-        }
-      }
-    };
-    checkPhantomWallet();
-  }, []);
-
-  const connectWallet = async () => {
-    try {
-      const provider = window?.phantom?.solana;
-      if (!provider) {
-        setError("Please install Phantom wallet!");
-        return;
-      }
-      const resp = await provider.connect();
-      setIsConnected(true);
-      setUserAccount(resp.publicKey.toString());
-    } catch (err) {
-      setError("Error connecting to Phantom wallet");
-    }
-  };
-
-  // Anchor initialize call
   const callInitialize = async () => {
     setLoading(true);
     setError("");
     setTxSig("");
     try {
-      const provider = window.phantom?.solana;
-      if (!provider || !userAccount) throw new Error('Phantom wallet not connected');
-      const connection = new Connection(clusterApiUrl('devnet'));
-      // Create AnchorProvider
-      const anchorProvider = new AnchorProvider(connection, provider, { preflightCommitment: 'processed' });
-      // Program ID from IDL
+      if (!anchorProvider || !publicKey) throw new Error('Wallet not connected');
       const programId = new PublicKey(idl.address);
-      // Create Program instance
       const program = new Program(idl, programId, anchorProvider);
-      // Call initialize
       const tx = await program.methods.initialize().rpc();
       setTxSig(tx);
-      await getBalance(userAccount);
+      await getBalance(publicKey.toBase58());
     } catch (e) {
       setError(e.message || JSON.stringify(e));
     }
@@ -104,32 +62,33 @@ function App() {
 
   return (
     <div className="container">
+      <Suspense fallback={<div>Loading wallet...</div>}>
+        <WalletButton />
+      </Suspense>
       <h1>Solana Wallet Balance Checker</h1>
       <div className="wallet-section">
-        {!hasWallet ? (
-          <p>Please install Phantom wallet</p>
-        ) : !isConnected ? (
-          <button onClick={connectWallet}>
-            Connect Phantom Wallet
-          </button>
-        ) : (
+        {!wallet ? (
+          <p>Please select a wallet to connect.</p>
+        ) : connected && publicKey ? (
           <div>
-            <p>Connected to Phantom</p>
-            <p>Address: {userAccount.slice(0, 6)}...{userAccount.slice(-4)}</p>
+            <p>Connected Wallet: {wallet.adapter.name}</p>
+            <p>Address: {publicKey.toBase58().slice(0, 6)}...{publicKey.toBase58().slice(-4)}</p>
             {loading ? (
               <p>Loading balance...</p>
             ) : balance ? (
               <h2>Balance: {balance}</h2>
             ) : null}
-            <button onClick={callInitialize} disabled={loading} style={{ marginTop: 16 }}>
+            <button onClick={callInitialize} disabled={loading || !publicKey} style={{ marginTop: 16 }}>
               Call Anchor Initialize
             </button>
             {txSig && <div>Tx Signature: <a href={`https://explorer.solana.com/tx/${txSig}?cluster=devnet`} target="_blank" rel="noopener noreferrer">{txSig}</a></div>}
           </div>
+        ) : (
+          <p>Wallet not connected. Please connect using the button above.</p>
         )}
         {error && <div className="error">{error}</div>}
       </div>
-      {!isConnected && (
+      {!connected && (
         <div className="manual-check">
           <h3>Check Any Solana Address</h3>
           <label>
@@ -140,11 +99,19 @@ function App() {
           </label>
           <div className="result">
             {loading && <span id="loader"></span>}
-            {!isConnected && balance && <h2 id="balance">{balance}</h2>}
+            {!connected && balance && <h2 id="balance">{balance}</h2>}
           </div>
         </div>
       )}
     </div>
+  );
+}
+
+function App() {
+  return (
+    <SolanaProvider>
+      <MainApp />
+    </SolanaProvider>
   );
 }
 
