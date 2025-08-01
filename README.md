@@ -1,12 +1,13 @@
-# Forge Hello World
+# Forge Web3 app
 
-This project contains a Forge app written in Javascript that displays `Hello World!` in a Jira issue context panel. 
+This project contains a Forge app written in Javascript that displays web3 Solana ap in a Jira issue context panel.
 
 See [developer.atlassian.com/platform/forge/](https://developer.atlassian.com/platform/forge) for documentation and tutorials explaining Forge.
 
 ## Requirements
 
 See [Set up Forge](https://developer.atlassian.com/platform/forge/set-up-forge/) for instructions to get set up.
+Setup Solana/Anchor develpoment environment
 
 ## Quick start
 - Install top-level dependencies:
@@ -14,14 +15,14 @@ See [Set up Forge](https://developer.atlassian.com/platform/forge/set-up-forge/)
 npm install
 ```
 
-- Install dependencies inside of the `static/hello-world` directory:
+- Install dependencies inside of the `static/voteon` directory:
 ```
 npm install
 ```
 
-- Modify your app by editing the files in `static/hello-world/src/`.
+- Modify your app by editing the files in `static/voteon/src/`.
 
-- Build your app (inside of the `static/hello-world` directory):
+- Build your app (inside of the `static/voteon` directory):
 ```
 npm run build
 ```
@@ -36,6 +37,19 @@ forge deploy
 forge install
 ```
 
+## Anchor
+
+- Modify your app by editing the files in `programs`.
+
+- Build your app (inside of the `.` directory):
+```
+anchor build
+```
+
+- Deploy your app by running:
+```
+anchor deploy
+```
 ### Notes
 - Use the `forge deploy` command when you want to persist code changes.
 - Use the `forge install` command when you want to install the app on a new site.

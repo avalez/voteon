@@ -1,8 +1,7 @@
 import React, { useEffect, useState, Suspense } from 'react';
 import { invoke } from '@forge/bridge';
 import { Connection, PublicKey, clusterApiUrl } from '@solana/web3.js';
-import { Program } from '@coral-xyz/anchor';
-import idl from './programs_voteon_idl.json';
+import { BASIC_PROGRAM_ID as programId, getBasicProgram} from './voteon-exports.ts';
 import { SolanaProvider, WalletButton, useAnchorProvider } from './solana-provider.tsx';
 import { useWallet } from '@solana/wallet-adapter-react';
 
@@ -45,8 +44,10 @@ function MainApp() {
     setTxSig("");
     try {
       if (!anchorProvider || !publicKey) throw new Error('Wallet not connected');
-      const programId = new PublicKey(idl.address);
-      const program = new Program(idl, programId, anchorProvider);
+
+      // Get the program using the helper function from voteon-exports
+      const program = getBasicProgram(anchorProvider);
+
       const tx = await program.methods.initialize().rpc();
       setTxSig(tx);
       await getBalance(publicKey.toBase58());
