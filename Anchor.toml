@@ -6,7 +6,7 @@ resolution = true
 skip-lint = false
 
 [programs.devnet]
-programs_voteon = "DTdGg36gheqPqJ8LFNzgsq3chmbejRHa2FNpAfCWMS6t"
+programs_voteon = "4H8y2YaMGgdyQNZTkV8Z841UrZ2Yse99JWJeYFeAKFX4"
 
 [programs.localnet]
 programs_voteon = "DTdGg36gheqPqJ8LFNzgsq3chmbejRHa2FNpAfCWMS6t"
