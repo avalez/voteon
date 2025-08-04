@@ -1,6 +1,6 @@
 import React, { useEffect, useState, Suspense } from 'react';
 import { invoke } from '@forge/bridge';
-import { Connection, PublicKey, clusterApiUrl } from '@solana/web3.js';
+import { Connection, PublicKey, clusterApiUrl, SendTransactionError } from '@solana/web3.js';
 import { BASIC_PROGRAM_ID as programId, getBasicProgram} from './voteon-exports.ts';
 import { SolanaProvider, WalletButton, useAnchorProvider } from './solana-provider.tsx';
 import { useWallet } from '@solana/wallet-adapter-react';
@@ -11,6 +11,8 @@ function MainApp() {
   const [error, setError] = useState("");
   const [balance, setBalance] = useState("");
   const [txSig, setTxSig] = useState("");
+  const [isInitialized, setIsInitialized] = useState(false);
+  const [txStatus, setTxStatus] = useState("");
 
   const anchorProvider = useAnchorProvider();
   const { wallet, publicKey, connected } = useWallet();
@@ -51,8 +53,65 @@ function MainApp() {
       const tx = await program.methods.initialize().rpc();
       setTxSig(tx);
       await getBalance(publicKey.toBase58());
+      
+      // Show success message
+      setError("");
+      setTxStatus("Transaction successful! Program initialized.");
     } catch (e) {
-      setError(e.message || JSON.stringify(e));
+      // Handle SendTransactionError specifically
+      if (e instanceof SendTransactionError) {
+        const logs = e.getLogs();
+        console.error('Transaction failed with logs:', logs);
+
+        // Check if it's a timeout error
+        if (e.message.includes('not confirmed in') || e.message.includes('timeout')) {
+          setError(`Transaction timeout: ${e.message}. Check the transaction signature above to verify if it succeeded.`);
+          // Don't mark as initialized for timeout - let user check manually
+        } else if (e.message.includes('already been processed')) {
+          setIsInitialized(true);
+          setError("Program has already been initialized. You can reset to try again.");
+        } else {
+          setError(`Transaction failed: ${e.message}. Logs: ${JSON.stringify(logs)}`);
+        }
+      } else {
+        setError(e.message || JSON.stringify(e));
+      }
+    }
+    setLoading(false);
+  };
+
+  const resetInitialization = () => {
+    setIsInitialized(false);
+    setTxSig("");
+    setError("");
+    setTxStatus("");
+    // Add a small delay to prevent rapid successive calls
+    setTimeout(() => {
+      setLoading(false);
+    }, 1000);
+  };
+
+  const checkTransactionStatus = async (signature) => {
+    if (!signature) return;
+
+    setLoading(true);
+    try {
+      const connection = new Connection(clusterApiUrl('devnet'));
+      const status = await connection.getSignatureStatus(signature);
+
+      if (status.value) {
+        if (status.value.confirmationStatus === 'confirmed' || status.value.confirmationStatus === 'finalized') {
+          setTxStatus("Transaction confirmed successfully!");
+          setIsInitialized(true);
+          setError("Program initialized successfully!");
+        } else {
+          setTxStatus(`Transaction status: ${status.value.confirmationStatus}`);
+        }
+      } else {
+        setTxStatus("Transaction not found or still pending");
+      }
+    } catch (e) {
+      setTxStatus(`Error checking status: ${e.message}`);
     }
     setLoading(false);
   };
