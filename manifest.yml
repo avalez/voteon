@@ -16,8 +16,11 @@ permissions:
   external:
     fetch:
       client:
-        - 'https://*.solana.com'
-        - 'https://*.phantom.app'
+        - address: https://*.solana.com
+        - address: https://*.phantom.app
+      backend:
+        - address: https://*.solana.com
+  scopes: []
 app:
   runtime:
     name: nodejs22.x

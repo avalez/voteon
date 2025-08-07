@@ -6,38 +6,19 @@ import { SolanaProvider, WalletButton, useAnchorProvider } from './solana-provid
 import { useWallet } from '@solana/wallet-adapter-react';
 
 function MainApp() {
-  const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [balance, setBalance] = useState("");
   const [txSig, setTxSig] = useState("");
-  const [isInitialized, setIsInitialized] = useState(false);
-  const [txStatus, setTxStatus] = useState("");
 
   const anchorProvider = useAnchorProvider();
   const { wallet, publicKey, connected } = useWallet();
 
-  const getBalance = async (addressToCheck) => {
-    if (!addressToCheck) return;
-    setLoading(true);
-    setError(null);
-    setBalance(null);
-    try {
-      const connection = new Connection(clusterApiUrl('devnet'));
-      const pubKey = new PublicKey(addressToCheck);
-      const balance = await connection.getBalance(pubKey);
-      const solBalance = balance / 1e9;
-      setBalance(`${solBalance} SOL`);
-    } catch (e) {
-      setError(JSON.stringify(e));
-    }
-    setLoading(false);
-  };
-
   useEffect(() => {
     if (connected && publicKey) {
-      getBalance(publicKey.toBase58());
-    }
+      const getBalance = async () => invoke('getBalance', { publicKey: publicKey.toBase58() });
+      getBalance().then(setBalance).catch(setError);
+      }
   }, [connected, publicKey]);
 
   const callInitialize = async () => {
@@ -79,46 +60,6 @@ function MainApp() {
     }
     setLoading(false);
   };
-
-  const resetInitialization = () => {
-    setIsInitialized(false);
-    setTxSig("");
-    setError("");
-    setTxStatus("");
-    // Add a small delay to prevent rapid successive calls
-    setTimeout(() => {
-      setLoading(false);
-    }, 1000);
-  };
-
-  const checkTransactionStatus = async (signature) => {
-    if (!signature) return;
-
-    setLoading(true);
-    try {
-      const connection = new Connection(clusterApiUrl('devnet'));
-      const status = await connection.getSignatureStatus(signature);
-
-      if (status.value) {
-        if (status.value.confirmationStatus === 'confirmed' || status.value.confirmationStatus === 'finalized') {
-          setTxStatus("Transaction confirmed successfully!");
-          setIsInitialized(true);
-          setError("Program initialized successfully!");
-        } else {
-          setTxStatus(`Transaction status: ${status.value.confirmationStatus}`);
-        }
-      } else {
-        setTxStatus("Transaction not found or still pending");
-      }
-    } catch (e) {
-      setTxStatus(`Error checking status: ${e.message}`);
-    }
-    setLoading(false);
-  };
-
-  useEffect(() => {
-    invoke('getText', { example: 'my-invoke-variable' }).then(setData);
-  }, []);
 
   return (
     <div className="container">
