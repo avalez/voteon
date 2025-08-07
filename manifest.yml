@@ -18,6 +18,7 @@ permissions:
       client:
         - address: https://*.solana.com
         - address: https://*.phantom.app
+        - address: wss://*.solana.com
       backend:
         - address: https://*.solana.com
   scopes: []

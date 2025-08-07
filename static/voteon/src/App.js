@@ -9,6 +9,7 @@ function MainApp() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [balance, setBalance] = useState("");
+  const [initialized, setIsInitialized] = useState("");
   const [txSig, setTxSig] = useState("");
 
   const anchorProvider = useAnchorProvider();
@@ -82,6 +83,7 @@ function MainApp() {
             <button onClick={callInitialize} disabled={loading || !publicKey} style={{ marginTop: 16 }}>
               Call Anchor Initialize
             </button>
+            {initialized && <div>Initialized</div>}
             {txSig && <div>Tx Signature: <a href={`https://explorer.solana.com/tx/${txSig}?cluster=devnet`} target="_blank" rel="noopener noreferrer">{txSig}</a></div>}
           </div>
         ) : (
@@ -89,21 +91,6 @@ function MainApp() {
         )}
         {error && <div className="error">{error}</div>}
       </div>
-      {!connected && (
-        <div className="manual-check">
-          <h3>Check Any Solana Address</h3>
-          <label>
-            <div>
-              <b>Wallet address</b>
-            </div>
-            <input type="text" onChange={(e) => getBalance(e.target.value)} />
-          </label>
-          <div className="result">
-            {loading && <span id="loader"></span>}
-            {!connected && balance && <h2 id="balance">{balance}</h2>}
-          </div>
-        </div>
-      )}
     </div>
   );
 }
