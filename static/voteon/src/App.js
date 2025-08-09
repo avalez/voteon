@@ -33,9 +33,7 @@ function MainApp() {
       const program = getBasicProgram(anchorProvider);
 
       const tx = await program.methods.initialize().rpc();
-      setTxSig(tx);
-      await getBalance(publicKey.toBase58());
-      
+      setTxSig(tx);      
       // Show success message
       setError("");
       setTxStatus("Transaction successful! Program initialized.");
