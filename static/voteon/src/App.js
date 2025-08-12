@@ -36,7 +36,6 @@ function MainApp() {
       setTxSig(tx);      
       // Show success message
       setError("");
-      setTxStatus("Transaction successful! Program initialized.");
     } catch (e) {
       // Handle SendTransactionError specifically
       if (e instanceof SendTransactionError) {
