@@ -6,16 +6,16 @@ resolution = true
 skip-lint = false
 
 [programs.devnet]
-programs_voteon = "4H8y2YaMGgdyQNZTkV8Z841UrZ2Yse99JWJeYFeAKFX4"
+programs_voteon = "H69FiJvdHxCCmeoN1WaXEygsvoxt3GTxZx9AqrkHJf28"
 
 [programs.localnet]
-programs_voteon = "DTdGg36gheqPqJ8LFNzgsq3chmbejRHa2FNpAfCWMS6t"
+programs_voteon = "H69FiJvdHxCCmeoN1WaXEygsvoxt3GTxZx9AqrkHJf28"
 
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "devnet"
+cluster = "localnet"
 wallet = "~/.config/solana/id.json"
 
 [scripts]
