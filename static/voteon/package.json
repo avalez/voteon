@@ -5,18 +5,22 @@
   "homepage": ".",
   "dependencies": {
     "@atlaskit/css-reset": "^6.6.2",
+    "@coral-xyz/anchor": "^0.31.1",
     "@forge/bridge": "^4.5.3",
+    "@solana/spl-token": "^0.4.14",
     "@solana/wallet-adapter-base": "^0.9.27",
     "@solana/wallet-adapter-phantom": "^0.9.28",
     "@solana/wallet-adapter-react": "^0.15.39",
     "@solana/wallet-adapter-react-ui": "^0.9.39",
     "@solana/web3.js": "^1.98.2",
     "@tatumio/tatum": "^4.2.8",
-    "@coral-xyz/anchor": "^0.31.1",
+    "bn.js": "^5.2.3",
+    "buffer": "^6.0.3",
     "react": "^16",
     "react-dom": "^16"
   },
   "devDependencies": {
+    "@types/react": "^19.2.14",
     "react-scripts": "^5.0.1"
   },
   "scripts": {

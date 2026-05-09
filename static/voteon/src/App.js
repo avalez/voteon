@@ -1,9 +1,14 @@
+import { Buffer as BufferPolyfill } from 'buffer';
+window.Buffer = window.Buffer || BufferPolyfill;
 import React, { useEffect, useState, Suspense } from 'react';
 import { invoke } from '@forge/bridge';
-import { Connection, PublicKey, clusterApiUrl, SendTransactionError } from '@solana/web3.js';
-import { BASIC_PROGRAM_ID as programId, getBasicProgram} from './voteon-exports.ts';
+import { Connection, PublicKey, clusterApiUrl, SendTransactionError, Keypair } from '@solana/web3.js';
+import { BASIC_PROGRAM_ID as programId, getBasicProgram } from './voteon-exports.ts';
 import { SolanaProvider, WalletButton, useAnchorProvider } from './solana-provider.tsx';
 import { useWallet } from '@solana/wallet-adapter-react';
+import { getAssociatedTokenAddressSync, TOKEN_PROGRAM_ID } from '@solana/spl-token';
+import BN from 'bn.js';
+import { Buffer } from 'buffer';
 
 function MainApp() {
   const [loading, setLoading] = useState(false);
@@ -19,7 +24,7 @@ function MainApp() {
     if (connected && publicKey) {
       const getBalance = async () => invoke('getBalance', { publicKey: publicKey.toBase58() });
       getBalance().then(setBalance).catch(setError);
-      }
+    }
   }, [connected, publicKey]);
 
   const callInitialize = async () => {
@@ -33,7 +38,7 @@ function MainApp() {
       const program = getBasicProgram(anchorProvider);
 
       const tx = await program.methods.initialize().rpc();
-      setTxSig(tx);      
+      setTxSig(tx);
       // Show success message
       setError("");
     } catch (e) {
@@ -59,6 +64,69 @@ function MainApp() {
     setLoading(false);
   };
 
+  const callMakeOffer = async () => {
+    setLoading(true);
+    setError("");
+    setTxSig("");
+    try {
+      if (!anchorProvider || !publicKey) throw new Error('Wallet not connected');
+
+      const program = getBasicProgram(anchorProvider);
+
+      // We generate random dummy public keys for the token mints.
+      // Note: In a real scenario, these would be valid existing token mints.
+      // The transaction will fail on-chain since these mints don't exist and accounts aren't initialized.
+      const tokenMintA = Keypair.generate().publicKey;
+      const tokenMintB = Keypair.generate().publicKey;
+
+      const offerId = new BN(1);
+      const tokenAOfferedAmount = new BN(100);
+      const tokenBWantedAmount = new BN(100);
+
+      const [offer] = PublicKey.findProgramAddressSync(
+        [
+          Buffer.from("offer"),
+          publicKey.toBuffer(),
+          offerId.toArrayLike(Buffer, "le", 8),
+        ],
+        program.programId
+      );
+
+      const vault = getAssociatedTokenAddressSync(
+        tokenMintA,
+        offer,
+        true,
+        TOKEN_PROGRAM_ID
+      );
+
+      const makerTokenAccountA = getAssociatedTokenAddressSync(
+        tokenMintA,
+        publicKey,
+        false,
+        TOKEN_PROGRAM_ID
+      );
+
+      const tx = await program.methods
+        .makeOffer(offerId, tokenAOfferedAmount, tokenBWantedAmount)
+        .accounts({
+          maker: publicKey,
+          tokenMintA,
+          tokenMintB,
+          makerTokenAccountA,
+          offer,
+          vault,
+          tokenProgram: TOKEN_PROGRAM_ID,
+        })
+        .rpc();
+
+      setTxSig(tx);
+    } catch (e) {
+      console.error(e);
+      setError(e.message || JSON.stringify(e));
+    }
+    setLoading(false);
+  };
+
   return (
     <div className="container">
       <Suspense fallback={<div>Loading wallet...</div>}>
@@ -79,6 +147,9 @@ function MainApp() {
             ) : null}
             <button onClick={callInitialize} disabled={loading || !publicKey} style={{ marginTop: 16 }}>
               Call Anchor Initialize
+            </button>
+            <button onClick={callMakeOffer} disabled={loading || !publicKey} style={{ marginTop: 16, marginLeft: 8 }}>
+              Call Make Offer
             </button>
             {initialized && <div>Initialized</div>}
             {txSig && <div>Tx Signature: <a href={`https://explorer.solana.com/tx/${txSig}?cluster=devnet`} target="_blank" rel="noopener noreferrer">{txSig}</a></div>}

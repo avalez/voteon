@@ -24,7 +24,7 @@
   "dependencies": {
     "@coral-xyz/anchor": "0.31.1",
     "@forge/resolver": "^1.6.11",
-    "@solana-developers/helpers": "^2.8.1",
-    "@solana/spl-token": "^0.4.13"
+    "@solana-developers/helpers": "^2.3.0",
+    "@solana/spl-token": "^0.1.8"
   }
 }

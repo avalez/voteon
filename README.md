@@ -54,7 +54,11 @@ anchor deploy
 - Use the `forge deploy` command when you want to persist code changes.
 - Use the `forge install` command when you want to install the app on a new site.
 - Once the app is installed on a site, the site picks up the new app changes you deploy without needing to rerun the install command.
+- To get 10 sol on devnet: `solana airdrop 10 <your solana wallet address>`
+- Unlimited supply airdrop with github account: https://faucet.solana.com/
+- config solana cluster: `solana config set --url devnet`
+- config solana wallet: `solana config set --keypair ~/.config/solana/id.json`
+- config solana keypair: `solana-keygen new -f ~/.config/solana/id.json`
 
 ## Support
-
 See [Get help](https://developer.atlassian.com/platform/forge/get-help/) for how to get help and provide feedback.
