@@ -19,14 +19,12 @@ pub struct TakeOffer<'info> {
     #[account(mut)]
     pub maker: SystemAccount<'info>,
 
-    pub token_mint_a: InterfaceAccount<'info, Mint>,
-
-    pub token_mint_b: InterfaceAccount<'info, Mint>,
+    pub token_mint: InterfaceAccount<'info, Mint>,
 
     #[account(
         init_if_needed,
         payer = taker,
-        associated_token::mint = token_mint_a,
+        associated_token::mint = token_mint,
         associated_token::authority = taker,
         associated_token::token_program = token_program,
     )]
@@ -34,7 +32,7 @@ pub struct TakeOffer<'info> {
 
     #[account(
         mut,
-        associated_token::mint = token_mint_b,
+        associated_token::mint = token_mint,
         associated_token::authority = taker,
         associated_token::token_program = token_program,
     )]
@@ -43,7 +41,7 @@ pub struct TakeOffer<'info> {
     #[account(
         init_if_needed,
         payer = taker,
-        associated_token::mint = token_mint_b,
+        associated_token::mint = token_mint,
         associated_token::authority = maker,
         associated_token::token_program = token_program,
     )]
@@ -53,8 +51,7 @@ pub struct TakeOffer<'info> {
         mut,
         close = maker,
         has_one = maker,
-        has_one = token_mint_a,
-        has_one = token_mint_b,
+        has_one = token_mint,
         seeds = [b"offer", maker.key().as_ref(), offer.id.to_le_bytes().as_ref()],
         bump = offer.bump
     )]
@@ -62,7 +59,7 @@ pub struct TakeOffer<'info> {
 
     #[account(
         mut,
-        associated_token::mint = token_mint_a,
+        associated_token::mint = token_mint,
         associated_token::authority = offer,
         associated_token::token_program = token_program,
     )]
@@ -75,10 +72,10 @@ pub struct TakeOffer<'info> {
 
 pub fn send_wanted_tokens_to_maker(context: &Context<TakeOffer>) -> Result<()> {
     transfer_tokens(
-        &context.accounts.taker_token_account_b,
+        &context.accounts.taker_token_account_a,
         &context.accounts.maker_token_account_b,
-        &context.accounts.offer.token_b_wanted_amount,
-        &context.accounts.token_mint_b,
+        &context.accounts.offer.token_offered_amount,
+        &context.accounts.token_mint,
         &context.accounts.taker,
         &context.accounts.token_program,
     )
@@ -96,7 +93,7 @@ pub fn withdraw_and_close_vault(context: Context<TakeOffer>) -> Result<()> {
     let accounts = TransferChecked {
         from: context.accounts.vault.to_account_info(),
         to: context.accounts.taker_token_account_a.to_account_info(),
-        mint: context.accounts.token_mint_a.to_account_info(),
+        mint: context.accounts.token_mint.to_account_info(),
         authority: context.accounts.offer.to_account_info(),
     };
 
@@ -109,7 +106,7 @@ pub fn withdraw_and_close_vault(context: Context<TakeOffer>) -> Result<()> {
     transfer_checked(
         cpi_context,
         context.accounts.vault.amount,
-        context.accounts.token_mint_a.decimals,
+        context.accounts.token_mint.decimals,
     )?;
 
     let accounts = CloseAccount {

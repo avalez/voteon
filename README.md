@@ -50,6 +50,12 @@ anchor build
 ```
 anchor deploy
 ```
+
+- Copy generated idl
+```
+cp ./target/idl/programs_voteon.json ./static/voteon/src/programs_voteon_idl.json
+```
+
 ### Notes
 - Use the `forge deploy` command when you want to persist code changes.
 - Use the `forge install` command when you want to install the app on a new site.
@@ -59,6 +65,10 @@ anchor deploy
 - config solana cluster: `solana config set --url devnet`
 - config solana wallet: `solana config set --keypair ~/.config/solana/id.json`
 - config solana keypair: `solana-keygen new -f ~/.config/solana/id.json`
+- Create SPL token: `spl-token create-token`
+- Create SPL token account: `spl-token create-account <token_mint_address>`
+- Mint SPL token: `spl-token mint <token_mint_address> <amount> <token_account_address>`
+- Transfer SPL token: `spl-token transfer <token_mint_address> <amount> <token_account_address>` --fund-recipient
 
 ## Support
 See [Get help](https://developer.atlassian.com/platform/forge/get-help/) for how to get help and provide feedback.

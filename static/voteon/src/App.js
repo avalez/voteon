@@ -73,15 +73,11 @@ function MainApp() {
 
       const program = getBasicProgram(anchorProvider);
 
-      // We generate random dummy public keys for the token mints.
-      // Note: In a real scenario, these would be valid existing token mints.
-      // The transaction will fail on-chain since these mints don't exist and accounts aren't initialized.
-      const tokenMintA = Keypair.generate().publicKey;
-      const tokenMintB = Keypair.generate().publicKey;
+      // spl-token create-token
+      const tokenMintA = new PublicKey('AEuDBqvAUTAayxuBU6j749SGvPLHw4Vwd59YVShS1RKB');
 
       const offerId = new BN(1);
       const tokenAOfferedAmount = new BN(100);
-      const tokenBWantedAmount = new BN(100);
 
       const [offer] = PublicKey.findProgramAddressSync(
         [
@@ -107,11 +103,10 @@ function MainApp() {
       );
 
       const tx = await program.methods
-        .makeOffer(offerId, tokenAOfferedAmount, tokenBWantedAmount)
+        .makeOffer(offerId, tokenAOfferedAmount)
         .accounts({
           maker: publicKey,
           tokenMintA,
-          tokenMintB,
           makerTokenAccountA,
           offer,
           vault,

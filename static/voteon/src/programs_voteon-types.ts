@@ -50,9 +50,6 @@ export type ProgramsVoteon = {
           "name": "tokenMintA"
         },
         {
-          "name": "tokenMintB"
-        },
-        {
           "name": "makerTokenAccountA",
           "writable": true,
           "pda": {
@@ -210,11 +207,7 @@ export type ProgramsVoteon = {
           "type": "u64"
         },
         {
-          "name": "tokenAOfferedAmount",
-          "type": "u64"
-        },
-        {
-          "name": "tokenBWantedAmount",
+          "name": "tokenOfferedAmount",
           "type": "u64"
         }
       ]
@@ -245,13 +238,7 @@ export type ProgramsVoteon = {
           ]
         },
         {
-          "name": "tokenMintA",
-          "relations": [
-            "offer"
-          ]
-        },
-        {
-          "name": "tokenMintB",
+          "name": "tokenMint",
           "relations": [
             "offer"
           ]
@@ -271,7 +258,7 @@ export type ProgramsVoteon = {
               },
               {
                 "kind": "account",
-                "path": "tokenMintA"
+                "path": "tokenMint"
               }
             ],
             "program": {
@@ -328,7 +315,7 @@ export type ProgramsVoteon = {
               },
               {
                 "kind": "account",
-                "path": "tokenMintB"
+                "path": "tokenMint"
               }
             ],
             "program": {
@@ -385,7 +372,7 @@ export type ProgramsVoteon = {
               },
               {
                 "kind": "account",
-                "path": "tokenMintB"
+                "path": "tokenMint"
               }
             ],
             "program": {
@@ -469,7 +456,7 @@ export type ProgramsVoteon = {
               },
               {
                 "kind": "account",
-                "path": "tokenMintA"
+                "path": "tokenMint"
               }
             ],
             "program": {
@@ -563,15 +550,11 @@ export type ProgramsVoteon = {
             "type": "pubkey"
           },
           {
-            "name": "tokenMintA",
+            "name": "tokenMint",
             "type": "pubkey"
           },
           {
-            "name": "tokenMintB",
-            "type": "pubkey"
-          },
-          {
-            "name": "tokenBWantedAmount",
+            "name": "tokenOfferedAmount",
             "type": "u64"
           },
           {

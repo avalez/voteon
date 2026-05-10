@@ -44,9 +44,6 @@
           "name": "token_mint_a"
         },
         {
-          "name": "token_mint_b"
-        },
-        {
           "name": "maker_token_account_a",
           "writable": true,
           "pda": {
@@ -204,11 +201,7 @@
           "type": "u64"
         },
         {
-          "name": "token_a_offered_amount",
-          "type": "u64"
-        },
-        {
-          "name": "token_b_wanted_amount",
+          "name": "token_offered_amount",
           "type": "u64"
         }
       ]
@@ -239,13 +232,7 @@
           ]
         },
         {
-          "name": "token_mint_a",
-          "relations": [
-            "offer"
-          ]
-        },
-        {
-          "name": "token_mint_b",
+          "name": "token_mint",
           "relations": [
             "offer"
           ]
@@ -265,7 +252,7 @@
               },
               {
                 "kind": "account",
-                "path": "token_mint_a"
+                "path": "token_mint"
               }
             ],
             "program": {
@@ -322,7 +309,7 @@
               },
               {
                 "kind": "account",
-                "path": "token_mint_b"
+                "path": "token_mint"
               }
             ],
             "program": {
@@ -379,7 +366,7 @@
               },
               {
                 "kind": "account",
-                "path": "token_mint_b"
+                "path": "token_mint"
               }
             ],
             "program": {
@@ -463,7 +450,7 @@
               },
               {
                 "kind": "account",
-                "path": "token_mint_a"
+                "path": "token_mint"
               }
             ],
             "program": {
@@ -557,15 +544,11 @@
             "type": "pubkey"
           },
           {
-            "name": "token_mint_a",
+            "name": "token_mint",
             "type": "pubkey"
           },
           {
-            "name": "token_mint_b",
-            "type": "pubkey"
-          },
-          {
-            "name": "token_b_wanted_amount",
+            "name": "token_offered_amount",
             "type": "u64"
           },
           {
