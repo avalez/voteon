@@ -106,8 +106,67 @@ function MainApp() {
         .makeOffer(offerId, tokenAOfferedAmount)
         .accounts({
           maker: publicKey,
-          tokenMintA,
+          tokenMint: tokenMintA,
           makerTokenAccountA,
+          offer,
+          vault,
+          tokenProgram: TOKEN_PROGRAM_ID,
+        })
+        .rpc();
+
+      setTxSig(tx);
+    } catch (e) {
+      console.error(e);
+      setError(e.message || JSON.stringify(e));
+    }
+    setLoading(false);
+  };
+
+  const callTakeOffer = async () => {
+    setLoading(true);
+    setError("");
+    setTxSig("");
+    try {
+      if (!anchorProvider || !publicKey) throw new Error('Wallet not connected');
+
+      const program = getBasicProgram(anchorProvider);
+
+      const tokenMintA = new PublicKey('AEuDBqvAUTAayxuBU6j749SGvPLHw4Vwd59YVShS1RKB');
+
+      const offerId = new BN(1);
+
+      const [offer] = PublicKey.findProgramAddressSync(
+        [
+          Buffer.from("offer"),
+          publicKey.toBuffer(),
+          offerId.toArrayLike(Buffer, "le", 8),
+        ],
+        program.programId
+      );
+
+      const vault = getAssociatedTokenAddressSync(
+        tokenMintA,
+        offer,
+        true,
+        TOKEN_PROGRAM_ID
+      );
+
+      const makerTokenAccountA = getAssociatedTokenAddressSync(
+        tokenMintA,
+        publicKey,
+        false,
+        TOKEN_PROGRAM_ID
+      );
+
+      const tx = await program.methods
+        .takeOffer()
+        .accounts({
+          taker: publicKey,
+          maker: publicKey,
+          tokenMint: tokenMintA,
+          takerTokenAccountA: makerTokenAccountA,
+          takerTokenAccountB: makerTokenAccountA,
+          makerTokenAccountB: makerTokenAccountA,
           offer,
           vault,
           tokenProgram: TOKEN_PROGRAM_ID,
@@ -145,6 +204,9 @@ function MainApp() {
             </button>
             <button onClick={callMakeOffer} disabled={loading || !publicKey} style={{ marginTop: 16, marginLeft: 8 }}>
               Call Make Offer
+            </button>
+            <button onClick={callTakeOffer} disabled={loading || !publicKey} style={{ marginTop: 16, marginLeft: 8 }}>
+              Call Take Offer
             </button>
             {initialized && <div>Initialized</div>}
             {txSig && <div>Tx Signature: <a href={`https://explorer.solana.com/tx/${txSig}?cluster=devnet`} target="_blank" rel="noopener noreferrer">{txSig}</a></div>}

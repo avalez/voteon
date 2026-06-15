@@ -41,7 +41,7 @@
           "signer": true
         },
         {
-          "name": "token_mint_a"
+          "name": "token_mint"
         },
         {
           "name": "maker_token_account_a",
@@ -58,7 +58,7 @@
               },
               {
                 "kind": "account",
-                "path": "token_mint_a"
+                "path": "token_mint"
               }
             ],
             "program": {
@@ -141,7 +141,7 @@
               },
               {
                 "kind": "account",
-                "path": "token_mint_a"
+                "path": "token_mint"
               }
             ],
             "program": {

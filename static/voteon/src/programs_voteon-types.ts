@@ -47,7 +47,7 @@ export type ProgramsVoteon = {
           "signer": true
         },
         {
-          "name": "tokenMintA"
+          "name": "tokenMint"
         },
         {
           "name": "makerTokenAccountA",
@@ -64,7 +64,7 @@ export type ProgramsVoteon = {
               },
               {
                 "kind": "account",
-                "path": "tokenMintA"
+                "path": "tokenMint"
               }
             ],
             "program": {
@@ -147,7 +147,7 @@ export type ProgramsVoteon = {
               },
               {
                 "kind": "account",
-                "path": "tokenMintA"
+                "path": "tokenMint"
               }
             ],
             "program": {
