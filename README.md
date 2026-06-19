@@ -37,6 +37,40 @@ forge deploy
 forge install
 ```
 
+## Deploying UI changes to Jira
+
+The Jira issue context panel is served from `static/voteon/build` (see `manifest.yml`). `anchor build` only rebuilds the on-chain Solana program and does **not** update the Jira UI.
+
+To publish frontend or Forge resolver changes:
+
+```bash
+cd static/voteon && npm run build
+cd ../.. && forge deploy
+```
+
+Check that the site picked up the deployment:
+
+```bash
+forge install list
+```
+
+If the installation shows **Outdated app** or a lower major version than your latest deploy, upgrade it:
+
+```bash
+forge install --upgrade --site <your-site>.atlassian.net --product jira --environment development
+```
+
+Site admins can also upgrade from **Settings → Apps → Manage apps**.
+
+After upgrading, hard-refresh the Jira issue page (or close and reopen the issue context panel). Custom UI iframes can cache aggressively.
+
+### Minor vs major Forge versions
+
+- **Minor version** (UI/resolver changes only): applied automatically to all sites on that major version after `forge deploy`.
+- **Major version** (manifest permission changes, e.g. adding/removing scopes): requires `forge install --upgrade` or admin approval before the site runs the new version.
+
+See [Forge app versions](https://developer.atlassian.com/platform/forge/versions/) for details.
+
 ## Anchor
 
 - Modify your app by editing the files in `programs`.
@@ -57,9 +91,9 @@ cp ./target/idl/programs_voteon.json ./static/voteon/src/programs_voteon_idl.jso
 ```
 
 ### Notes
-- Use the `forge deploy` command when you want to persist code changes.
-- Use the `forge install` command when you want to install the app on a new site.
-- Once the app is installed on a site, the site picks up the new app changes you deploy without needing to rerun the install command.
+- Use `forge deploy` to publish Forge and Custom UI changes.
+- Use `forge install` to install the app on a new site.
+- After `forge deploy`, minor version updates roll out automatically; major version updates require `forge install --upgrade`.
 - To get 10 sol on devnet: `solana airdrop 10 <your solana wallet address>`
 - Unlimited supply airdrop with github account: https://faucet.solana.com/
 - config solana cluster: `solana config set --url devnet`
