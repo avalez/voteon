@@ -10,6 +10,8 @@ import { getAssociatedTokenAddressSync, TOKEN_PROGRAM_ID } from '@solana/spl-tok
 import BN from 'bn.js';
 import { Buffer } from 'buffer';
 
+const OFFER_ID = new BN(4);
+
 function MainApp() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -76,7 +78,7 @@ function MainApp() {
       // spl-token create-token
       const tokenMintA = new PublicKey('AEuDBqvAUTAayxuBU6j749SGvPLHw4Vwd59YVShS1RKB');
 
-      const offerId = new BN(1);
+      const offerId = OFFER_ID;
       const tokenAOfferedAmount = new BN(100);
 
       const [offer] = PublicKey.findProgramAddressSync(
@@ -133,7 +135,8 @@ function MainApp() {
 
       const tokenMintA = new PublicKey('AEuDBqvAUTAayxuBU6j749SGvPLHw4Vwd59YVShS1RKB');
 
-      const offerId = new BN(1);
+      const offerId = OFFER_ID;
+      const lockAmount = new BN(100);
 
       const [offer] = PublicKey.findProgramAddressSync(
         [
@@ -151,7 +154,7 @@ function MainApp() {
         TOKEN_PROGRAM_ID
       );
 
-      const makerTokenAccountA = getAssociatedTokenAddressSync(
+      const takerTokenAccount = getAssociatedTokenAddressSync(
         tokenMintA,
         publicKey,
         false,
@@ -159,14 +162,68 @@ function MainApp() {
       );
 
       const tx = await program.methods
-        .takeOffer()
+        .takeOffer(lockAmount)
         .accounts({
           taker: publicKey,
           maker: publicKey,
           tokenMint: tokenMintA,
-          takerTokenAccountA: makerTokenAccountA,
-          takerTokenAccountB: makerTokenAccountA,
-          makerTokenAccountB: makerTokenAccountA,
+          takerTokenAccount,
+          offer,
+          vault,
+          tokenProgram: TOKEN_PROGRAM_ID,
+        })
+        .rpc();
+
+      setTxSig(tx);
+    } catch (e) {
+      console.error(e);
+      setError(e.message || JSON.stringify(e));
+    }
+    setLoading(false);
+  };
+
+  const callClaimOffer = async () => {
+    setLoading(true);
+    setError("");
+    setTxSig("");
+    try {
+      if (!anchorProvider || !publicKey) throw new Error('Wallet not connected');
+
+      const program = getBasicProgram(anchorProvider);
+
+      const tokenMintA = new PublicKey('AEuDBqvAUTAayxuBU6j749SGvPLHw4Vwd59YVShS1RKB');
+
+      const offerId = OFFER_ID;
+
+      const [offer] = PublicKey.findProgramAddressSync(
+        [
+          Buffer.from("offer"),
+          publicKey.toBuffer(),
+          offerId.toArrayLike(Buffer, "le", 8),
+        ],
+        program.programId
+      );
+
+      const vault = getAssociatedTokenAddressSync(
+        tokenMintA,
+        offer,
+        true,
+        TOKEN_PROGRAM_ID
+      );
+
+      const makerTokenAccount = getAssociatedTokenAddressSync(
+        tokenMintA,
+        publicKey,
+        false,
+        TOKEN_PROGRAM_ID
+      );
+
+      const tx = await program.methods
+        .claimOffer()
+        .accounts({
+          maker: publicKey,
+          tokenMint: tokenMintA,
+          makerTokenAccount,
           offer,
           vault,
           tokenProgram: TOKEN_PROGRAM_ID,
@@ -203,10 +260,13 @@ function MainApp() {
               Call Anchor Initialize
             </button>
             <button onClick={callMakeOffer} disabled={loading || !publicKey} style={{ marginTop: 16, marginLeft: 8 }}>
-              Call Make Offer
+              Create Offer (Lock)
             </button>
             <button onClick={callTakeOffer} disabled={loading || !publicKey} style={{ marginTop: 16, marginLeft: 8 }}>
-              Call Take Offer
+              Lock Tokens
+            </button>
+            <button onClick={callClaimOffer} disabled={loading || !publicKey} style={{ marginTop: 16, marginLeft: 8 }}>
+              Claim Locked Tokens
             </button>
             {initialized && <div>Initialized</div>}
             {txSig && <div>Tx Signature: <a href={`https://explorer.solana.com/tx/${txSig}?cluster=devnet`} target="_blank" rel="noopener noreferrer">{txSig}</a></div>}

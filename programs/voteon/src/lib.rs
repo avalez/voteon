@@ -29,9 +29,12 @@ pub mod programs_voteon {
         instructions::make_offer::save_offer(context, id, token_offered_amount)
     }
 
-    pub fn take_offer(context: Context<TakeOffer>) -> Result<()> {
-        instructions::take_offer::send_wanted_tokens_to_maker(&context)?;
-        instructions::take_offer::withdraw_and_close_vault(context)
+    pub fn take_offer(context: Context<TakeOffer>, amount: u64) -> Result<()> {
+        instructions::take_offer::lock_tokens_in_vault(context, amount)
+    }
+
+    pub fn claim_offer(context: Context<ClaimOffer>) -> Result<()> {
+        instructions::claim_offer::release_locked_tokens(context)
     }
 }
 
