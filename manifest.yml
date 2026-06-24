@@ -1,4 +1,10 @@
 modules:
+  webtrigger:
+    - key: github-webhook-trigger
+      function: github-webhook-handler
+      urlFormat: v2
+      response:
+        type: dynamic
   jira:issueContext:
     - key: voteon-context
       resource: main
@@ -9,6 +15,8 @@ modules:
   function:
     - key: resolver
       handler: index.handler
+    - key: github-webhook-handler
+      handler: index.githubWebhook
 resources:
   - key: main
     path: static/voteon/build
@@ -28,4 +36,3 @@ app:
     memoryMB: 256
     architecture: arm64
   id: ari:cloud:ecosystem::app/9bc1dd80-e5fe-4a8f-b983-9f4e64dc5f39
-
