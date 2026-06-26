@@ -4,12 +4,12 @@ use anchor_spl::{
     token_interface::{Mint, TokenAccount, TokenInterface},
 };
 
-use crate::{Offer, ANCHOR_DISCRIMINATOR};
+use crate::{Offer, ANCHOR_DISCRIMINATOR, OFFER_EXPIRATION_SLOTS};
 
 use super::transfer_tokens;
 
 #[derive(Accounts)]
-#[instruction(id: u64)]
+#[instruction(id: u64, maker_amount: u64)]
 pub struct MakeOffer<'info> {
     #[account(mut)]
     pub maker: Signer<'info>,
@@ -23,7 +23,7 @@ pub struct MakeOffer<'info> {
         associated_token::authority = maker,
         associated_token::token_program = token_program
     )]
-    pub maker_token_account_a: InterfaceAccount<'info, TokenAccount>,
+    pub maker_token_account: InterfaceAccount<'info, TokenAccount>,
 
     #[account(
         init,
@@ -48,26 +48,33 @@ pub struct MakeOffer<'info> {
     pub associated_token_program: Program<'info, AssociatedToken>,
 }
 
-pub fn send_offered_tokens_to_vault(
-    context: &Context<MakeOffer>,
-    token_offered_amount: u64,
+pub fn make_offer_instruction(
+    context: Context<MakeOffer>,
+    id: u64,
+    maker_amount: u64,
 ) -> Result<()> {
+    // Lock maker's tokens
     transfer_tokens(
-        &context.accounts.maker_token_account_a,
+        &context.accounts.maker_token_account,
         &context.accounts.vault,
-        &token_offered_amount,
+        &maker_amount,
         &context.accounts.token_mint,
         &context.accounts.maker,
         &context.accounts.token_program,
-    )
-}
+    )?;
 
-pub fn save_offer(context: Context<MakeOffer>, id: u64, token_offered_amount: u64) -> Result<()> {
+    // Initialize offer state
+    let clock = Clock::get()?;
     context.accounts.offer.set_inner(Offer {
         id,
         maker: context.accounts.maker.key(),
+        taker: None,
         token_mint: context.accounts.token_mint.key(),
-        token_offered_amount,
+        maker_amount,
+        taker_amount: 0,
+        maker_locked: true,
+        taker_locked: false,
+        expiration: clock.slot + OFFER_EXPIRATION_SLOTS,
         bump: context.bumps.offer,
     });
     Ok(())

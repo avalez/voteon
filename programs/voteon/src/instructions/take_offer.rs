@@ -10,8 +10,6 @@ pub struct TakeOffer<'info> {
     #[account(mut)]
     pub taker: Signer<'info>,
 
-    pub maker: SystemAccount<'info>,
-
     pub token_mint: InterfaceAccount<'info, Mint>,
 
     #[account(
@@ -24,9 +22,8 @@ pub struct TakeOffer<'info> {
 
     #[account(
         mut,
-        has_one = maker,
         has_one = token_mint,
-        seeds = [b"offer", maker.key().as_ref(), offer.id.to_le_bytes().as_ref()],
+        seeds = [b"offer", offer.maker.as_ref(), offer.id.to_le_bytes().as_ref()],
         bump = offer.bump
     )]
     pub offer: Account<'info, Offer>,
@@ -42,13 +39,38 @@ pub struct TakeOffer<'info> {
     pub token_program: Interface<'info, TokenInterface>,
 }
 
-pub fn lock_tokens_in_vault(context: Context<TakeOffer>, amount: u64) -> Result<()> {
+pub fn take_offer_instruction(
+    context: Context<TakeOffer>,
+    taker_amount: u64,
+) -> Result<()> {
+    // Verify offer not expired
+    let clock = Clock::get()?;
+    require!(
+        clock.slot < context.accounts.offer.expiration,
+        crate::error::ErrorCode::OfferNotExpired
+    );
+
+    // Verify taker hasn't already locked
+    require!(
+        !context.accounts.offer.taker_locked,
+        crate::error::ErrorCode::TakerNotLocked
+    );
+
+    // Lock taker's tokens in vault
     transfer_tokens(
         &context.accounts.taker_token_account,
         &context.accounts.vault,
-        &amount,
+        &taker_amount,
         &context.accounts.token_mint,
         &context.accounts.taker,
         &context.accounts.token_program,
-    )
+    )?;
+
+    // Update offer state
+    let offer = &mut context.accounts.offer;
+    offer.taker = Some(context.accounts.taker.key());
+    offer.taker_amount = taker_amount;
+    offer.taker_locked = true;
+
+    Ok(())
 }
