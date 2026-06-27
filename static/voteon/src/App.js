@@ -64,6 +64,10 @@ function MainApp() {
     setLoading(false);
   };
 
+  const offerId = new BN(5);
+  // spl-token create-token
+  const tokenMint = new PublicKey('AEuDBqvAUTAayxuBU6j749SGvPLHw4Vwd59YVShS1RKB');
+
   const callMakeOffer = async () => {
     setLoading(true);
     setError("");
@@ -73,11 +77,7 @@ function MainApp() {
 
       const program = getBasicProgram(anchorProvider);
 
-      // spl-token create-token
-      const tokenMintA = new PublicKey('AEuDBqvAUTAayxuBU6j749SGvPLHw4Vwd59YVShS1RKB');
-
-      const offerId = new BN(1);
-      const tokenAOfferedAmount = new BN(100);
+      const tokenOfferedAmount = new BN(100);
 
       const [offer] = PublicKey.findProgramAddressSync(
         [
@@ -89,25 +89,25 @@ function MainApp() {
       );
 
       const vault = getAssociatedTokenAddressSync(
-        tokenMintA,
+        tokenMint,
         offer,
         true,
         TOKEN_PROGRAM_ID
       );
 
-      const makerTokenAccountA = getAssociatedTokenAddressSync(
-        tokenMintA,
+      const makerTokenAccount = getAssociatedTokenAddressSync(
+        tokenMint,
         publicKey,
         false,
         TOKEN_PROGRAM_ID
       );
 
       const tx = await program.methods
-        .makeOffer(offerId, tokenAOfferedAmount)
+        .makeOffer(offerId, tokenOfferedAmount)
         .accounts({
           maker: publicKey,
-          tokenMint: tokenMintA,
-          makerTokenAccountA,
+          tokenMint,
+          makerTokenAccount,
           offer,
           vault,
           tokenProgram: TOKEN_PROGRAM_ID,
@@ -131,10 +131,6 @@ function MainApp() {
 
       const program = getBasicProgram(anchorProvider);
 
-      const tokenMintA = new PublicKey('AEuDBqvAUTAayxuBU6j749SGvPLHw4Vwd59YVShS1RKB');
-
-      const offerId = new BN(1);
-
       const [offer] = PublicKey.findProgramAddressSync(
         [
           Buffer.from("offer"),
@@ -145,14 +141,14 @@ function MainApp() {
       );
 
       const vault = getAssociatedTokenAddressSync(
-        tokenMintA,
+        tokenMint,
         offer,
         true,
         TOKEN_PROGRAM_ID
       );
 
-      const makerTokenAccountA = getAssociatedTokenAddressSync(
-        tokenMintA,
+      const makerTokenAccount = getAssociatedTokenAddressSync(
+        tokenMint,
         publicKey,
         false,
         TOKEN_PROGRAM_ID
@@ -163,10 +159,10 @@ function MainApp() {
         .accounts({
           taker: publicKey,
           maker: publicKey,
-          tokenMint: tokenMintA,
-          takerTokenAccountA: makerTokenAccountA,
-          takerTokenAccountB: makerTokenAccountA,
-          makerTokenAccountB: makerTokenAccountA,
+          tokenMint,
+          takerTokenAccountA: makerTokenAccount,
+          takerTokenAccountB: makerTokenAccount,
+          makerTokenAccount,
           offer,
           vault,
           tokenProgram: TOKEN_PROGRAM_ID,

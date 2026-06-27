@@ -5,7 +5,7 @@
  * IDL can be found at `target/idl/programs_voteon.json`.
  */
 export type ProgramsVoteon = {
-  "address": "H69FiJvdHxCCmeoN1WaXEygsvoxt3GTxZx9AqrkHJf28",
+  "address": "5sohsC8wdqG84G56B7sbTSD5W3zA3UXgtKXnQedCexrT",
   "metadata": {
     "name": "programsVoteon",
     "version": "0.1.0",

@@ -82,7 +82,7 @@ anchor build
 
 - Deploy your app by running:
 ```
-anchor deploy
+anchor deploy --provider.cluster https://api.devnet.solana.com
 ```
 
 - Copy generated idl

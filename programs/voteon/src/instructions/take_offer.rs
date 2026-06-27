@@ -45,7 +45,7 @@ pub struct TakeOffer<'info> {
         associated_token::authority = maker,
         associated_token::token_program = token_program,
     )]
-    pub maker_token_account_b: Box<InterfaceAccount<'info, TokenAccount>>,
+    pub maker_token_account: Box<InterfaceAccount<'info, TokenAccount>>,
 
     #[account(
         mut,
@@ -73,7 +73,7 @@ pub struct TakeOffer<'info> {
 pub fn send_wanted_tokens_to_maker(context: &Context<TakeOffer>) -> Result<()> {
     transfer_tokens(
         &context.accounts.taker_token_account_a,
-        &context.accounts.maker_token_account_b,
+        &context.accounts.maker_token_account,
         &context.accounts.offer.token_offered_amount,
         &context.accounts.token_mint,
         &context.accounts.taker,
